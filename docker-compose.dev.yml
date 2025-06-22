@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  sofy-music-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sofy-music-api-dev
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=development
+      - LOG_LEVEL=DEBUG
+      - RATE_LIMIT_PER_MINUTE=60
+      - MAX_CONCURRENT_REQUESTS=10
+      - REQUEST_TIMEOUT=300
+      - RETRY_ATTEMPTS=3
+      - RETRY_DELAY=1
+      - ENABLE_METRICS=true
+      - ENABLE_LOGGING=true
+    env_file:
+      - .env
+    volumes:
+      - ./uploads:/app/uploads
+      - ./logs:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - sofy-dev-network
+
+networks:
+  sofy-dev-network:
+    driver: bridge 
