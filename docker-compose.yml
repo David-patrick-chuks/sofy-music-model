@@ -1,11 +1,11 @@
 version: '3.8'
 
 services:
-  sofy-music-api:
+  app:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: sofy-music-api
+    container_name: sofy-music-app
     ports:
       - "8000:8000"
     environment:
@@ -30,30 +30,30 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
+    depends_on:
+      - mongo
     networks:
-      - sofy-network
+      - sofy-music-net
 
-  # Optional: Add Redis for caching and session management
-  redis:
-    image: redis:7-alpine
-    container_name: sofy-redis
+  mongo:
+    image: mongo:latest
+    container_name: sofy-music-mongo
     ports:
-      - "6379:6379"
+      - "27017:27017"
     volumes:
-      - redis_data:/data
+      - mongo-data:/data/db
     restart: unless-stopped
     networks:
-      - sofy-network
+      - sofy-music-net
 
-  # Optional: Add Prometheus for metrics collection
   prometheus:
-    image: prom/prometheus:latest
-    container_name: sofy-prometheus
+    image: prom/prometheus:v2.47.2
+    container_name: sofy-music-prometheus
     ports:
       - "9090:9090"
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
-      - prometheus_data:/prometheus
+      - prometheus-data:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
@@ -63,27 +63,27 @@ services:
       - '--web.enable-lifecycle'
     restart: unless-stopped
     networks:
-      - sofy-network
+      - sofy-music-net
 
-  # Optional: Add Grafana for metrics visualization
   grafana:
-    image: grafana/grafana:latest
-    container_name: sofy-grafana
+    image: grafana/grafana-oss:10.1.5
+    container_name: sofy-music-grafana
     ports:
       - "3000:3000"
     environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SECURITY_ADMIN_PASSWORD=grafana
+      - GF_USERS_ALLOW_SIGN_UP=false
     volumes:
-      - grafana_data:/var/lib/grafana
+      - grafana-storage:/var/lib/grafana
     restart: unless-stopped
     networks:
-      - sofy-network
+      - sofy-music-net
 
 volumes:
-  redis_data:
-  prometheus_data:
-  grafana_data:
+  prometheus-data: {}
+  grafana-storage: {}
+  mongo-data: {}
 
 networks:
-  sofy-network:
+  sofy-music-net:
     driver: bridge 
