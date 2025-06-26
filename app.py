@@ -213,7 +213,8 @@ class TaskInDB(BaseModel):
 class MusicGenerationResponse(BaseModel):
     task_id: str
     status: str = "started"
-    message: str = "Music generation started."
+    message: str = "Music generation started. Use the task_id to check status and download the file."
+    estimated_duration: Optional[int] = None
 
 class MusicStatusResponse(BaseModel):
     task_id: str
@@ -326,7 +327,11 @@ async def generate_music(request: MusicGenerationRequest, background_tasks: Back
     result = await db.tasks.insert_one(task.model_dump(by_alias=True))
     task_id = str(result.inserted_id)
     background_tasks.add_task(generate_music_task, task_id, request, db)
-    return MusicGenerationResponse(task_id=task_id)
+    estimated_duration = request.duration_seconds + 10  # Add buffer for processing
+    return MusicGenerationResponse(
+        task_id=task_id,
+        estimated_duration=estimated_duration
+    )
 
 @app.get("/music-status/{task_id}", response_model=MusicStatusResponse)
 async def get_music_status(task_id: str, request: Request):

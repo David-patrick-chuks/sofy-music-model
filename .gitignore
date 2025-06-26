@@ -144,3 +144,5 @@ uploads/
 # Test files
 test_*.py
 test_*.json 
+
+prometheus.yml
