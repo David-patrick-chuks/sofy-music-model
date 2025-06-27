@@ -1,5 +1,8 @@
 # Sofy Music Generator API
 
+> **IMPORTANT FOR RENDER DEPLOYMENT:**
+> You MUST manually add all environment variables from your `.env` or `.env.example` file to the Render dashboard under the Environment tab. Render does NOT automatically use your local `.env` file. If you skip this step, your deployment will fail.
+
 <p align="center">
   <a href="https://fastapi.tiangolo.com/"><img src="https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi" alt="FastAPI"></a>
   <a href="https://www.python.org/"><img src="https://img.shields.io/badge/Python-3.9%2B-blue?style=for-the-badge&logo=python" alt="Python"></a>
